@@ -40,6 +40,9 @@
       height: 160px;
       resize: none;
     }
+    .checkbox-group {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -47,23 +50,35 @@
     <h2>Binge Club Message Generator</h2>
 
     <label for="template">Choose Template:</label>
-    <select id="template">
+    <select id="template" onchange="toggleSlotSelectors()">
       <option value="payment">Payment Confirmation</option>
       <option value="review">Service Review on Google Maps</option>
       <option value="reminder">Service Reminder</option>
+      <option value="availability">Available Slots</option>
     </select>
 
-    <label for="name">Customer Name:</label>
-    <input type="text" id="name" placeholder="e.g. Rahul" />
+    <div id="nameSlotSection">
+      <label for="name">Customer Name:</label>
+      <input type="text" id="name" placeholder="e.g. Rahul" />
 
-    <label for="slot">Service Slot:</label>
-    <select id="slot">
-      <option value="Saturday, 4 PM">Saturday, 4 PM</option>
-      <option value="Saturday, 7 PM">Saturday, 7 PM</option>
-      <option value="Sunday, 11 AM">Sunday, 11 AM</option>
-      <option value="Sunday, 2 PM">Sunday, 2 PM</option>
-      <option value="Sunday, 5 PM">Sunday, 5 PM</option>
-    </select>
+      <label for="slot">Service Slot:</label>
+      <select id="slot">
+        <option value="Saturday, 4 PM">Saturday, 4 PM</option>
+        <option value="Saturday, 7 PM">Saturday, 7 PM</option>
+        <option value="Sunday, 11 AM">Sunday, 11 AM</option>
+        <option value="Sunday, 2 PM">Sunday, 2 PM</option>
+        <option value="Sunday, 5 PM">Sunday, 5 PM</option>
+      </select>
+    </div>
+
+    <div id="availabilitySection" style="display: none;">
+      <label for="screenSelect">Select Screen:</label>
+      <select id="screenSelect" onchange="renderSlotCheckboxes()">
+        <option value="screen1">Screen 1</option>
+        <option value="screen2">Screen 2</option>
+      </select>
+      <div id="slotCheckboxes" class="checkbox-group"></div>
+    </div>
 
     <button onclick="generateMessage()">Generate Message</button>
 
@@ -75,23 +90,66 @@
   </div>
 
   <script>
+    const screenSlots = {
+      screen1: {
+        Morning: "10:00 to 12:30pm",
+        Afternoon: "1:00pm to 3:30pm",
+        Evening: "4:00pm to 6:30pm",
+        Night: "7:00pm to 9:30pm",
+        "Late Night": "10:00pm to 12:30am"
+      },
+      screen2: {
+        Morning: "10:30 AM - 1:00 PM",
+        Afternoon: "1:15 PM - 3:45 PM",
+        Evening: "4:00 PM - 6:30 PM",
+        Night: "6:45 PM - 9:15 PM",
+        "Late Night": "9:45 PM - 12:15 AM"
+      }
+    };
+
+    function toggleSlotSelectors() {
+      const template = document.getElementById("template").value;
+      document.getElementById("nameSlotSection").style.display = (template === "availability") ? "none" : "block";
+      document.getElementById("availabilitySection").style.display = (template === "availability") ? "block" : "none";
+    }
+
+    function renderSlotCheckboxes() {
+      const screen = document.getElementById("screenSelect").value;
+      const container = document.getElementById("slotCheckboxes");
+      container.innerHTML = "";
+      for (const period in screenSlots[screen]) {
+        const time = screenSlots[screen][period];
+        const id = `${screen}_${period}`;
+        container.innerHTML += `
+          <label><input type="checkbox" value="${period}: ${time}" id="${id}"> ${period}: ${time}</label><br>
+        `;
+      }
+    }
+
     function generateMessage() {
       const template = document.getElementById("template").value;
       const name = document.getElementById("name").value.trim();
       const slot = document.getElementById("slot").value.trim();
-
       let message = "";
 
-      switch (template) {
-        case "payment":
-          message = `Hello ${name}\n\nGreetings from Binge Club.😊\n\nPlease make a payment of Rs.1000 via this link to book the ${slot}. The same has been sent over email too.`;
-          break;
-        case "review":
-          message = `Hello ${name}\n\nWe hope you enjoyed your session at ${slot}. We'd really appreciate it if you could leave us a review on Google Maps. Your feedback helps others discover us! 😊`;
-          break;
-        case "reminder":
-          message = `Hello ${name}\n\nThis is a friendly reminder about your upcoming service scheduled for ${slot}. We look forward to hosting you at Binge Club! 😊`;
-          break;
+      if (template === "availability") {
+        const screen = document.getElementById("screenSelect").value;
+        const checkboxes = document.querySelectorAll("#slotCheckboxes input[type='checkbox']");
+        const selected = [];
+        checkboxes.forEach(cb => { if (cb.checked) selected.push(cb.value); });
+        message = "*Available slots*\n" + selected.join("\n");
+      } else {
+        switch (template) {
+          case "payment":
+            message = `Hello ${name}\n\nGreetings from Binge Club.😊\n\nPlease make a payment of Rs.1000 via this link to book the ${slot}. The same has been sent over email too.`;
+            break;
+          case "review":
+            message = `Hello ${name}\n\nWe hope you enjoyed your session at ${slot}. We'd really appreciate it if you could leave us a review on Google Maps. Your feedback helps others discover us! 😊`;
+            break;
+          case "reminder":
+            message = `Hello ${name}\n\nThis is a friendly reminder about your upcoming service scheduled for ${slot}. We look forward to hosting you at Binge Club! 😊`;
+            break;
+        }
       }
 
       document.getElementById("output").value = message;
@@ -109,6 +167,9 @@
       const text = encodeURIComponent(document.getElementById("output").value);
       window.open(`https://wa.me/?text=${text}`, "_blank");
     }
+
+    // Initial load for screen 1 slots
+    renderSlotCheckboxes();
   </script>
 </body>
 </html>
