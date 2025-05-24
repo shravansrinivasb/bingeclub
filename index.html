@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binge Club Message Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input, select, button, textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    textarea {
+      height: 160px;
+      resize: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Binge Club Message Generator</h2>
+
+    <label for="template">Choose Template:</label>
+    <select id="template">
+      <option value="payment">Payment Confirmation</option>
+      <option value="review">Service Review on Google Maps</option>
+      <option value="reminder">Service Reminder</option>
+    </select>
+
+    <label for="name">Customer Name:</label>
+    <input type="text" id="name" placeholder="e.g. Rahul" />
+
+    <label for="slot">Service Slot:</label>
+    <select id="slot">
+      <option value="Saturday, 4 PM">Saturday, 4 PM</option>
+      <option value="Saturday, 7 PM">Saturday, 7 PM</option>
+      <option value="Sunday, 11 AM">Sunday, 11 AM</option>
+      <option value="Sunday, 2 PM">Sunday, 2 PM</option>
+      <option value="Sunday, 5 PM">Sunday, 5 PM</option>
+    </select>
+
+    <button onclick="generateMessage()">Generate Message</button>
+
+    <label for="output">Generated Message:</label>
+    <textarea id="output" readonly></textarea>
+
+    <button onclick="copyMessage()">Copy Message</button>
+    <button onclick="sendWhatsApp()" style="background-color:#25D366;margin-top:10px">Send via WhatsApp</button>
+  </div>
+
+  <script>
+    function generateMessage() {
+      const template = document.getElementById("template").value;
+      const name = document.getElementById("name").value.trim();
+      const slot = document.getElementById("slot").value.trim();
+
+      let message = "";
+
+      switch (template) {
+        case "payment":
+          message = `Hello ${name}\n\nGreetings from Binge Club.😊\n\nPlease make a payment of Rs.1000 via this link to book the ${slot}. The same has been sent over email too.`;
+          break;
+        case "review":
+          message = `Hello ${name}\n\nWe hope you enjoyed your session at ${slot}. We'd really appreciate it if you could leave us a review on Google Maps. Your feedback helps others discover us! 😊`;
+          break;
+        case "reminder":
+          message = `Hello ${name}\n\nThis is a friendly reminder about your upcoming service scheduled for ${slot}. We look forward to hosting you at Binge Club! 😊`;
+          break;
+      }
+
+      document.getElementById("output").value = message;
+    }
+
+    function copyMessage() {
+      const output = document.getElementById("output");
+      output.select();
+      output.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Message copied to clipboard!");
+    }
+
+    function sendWhatsApp() {
+      const text = encodeURIComponent(document.getElementById("output").value);
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    }
+  </script>
+</body>
+</html>
